@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
-
+import torch.nn.functional as F
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -26,7 +26,7 @@ class Actor(nn.Module):
     def forward(self, state):  # 마지막 층 
         x = self.net(state)
         mu = torch.tanh(self.mu(x)) * self.action_bound
-        std = torch.softplus(self.std(x)) + 1e-3
+        std = F.softplus(self.std(x)) + 1e-3
         return mu, std
 
 """
@@ -56,22 +56,27 @@ class Critic(nn.Module):
 
 
 class A2CAgent:
-    def __init__(self, env):
+    def __init__(self, env, lr=1e-3, gamma=0.99, device="cpu"):
         self.env = env
-        self.gamma = 0.95
+        self.gamma = gamma
+        self.device = device
         self.batch_size = 32
 
         self.state_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.shape[0]
         self.action_bound = env.action_space.high[0]
 
-        self.actor = Actor(self.state_dim, self.action_dim, self.action_bound).to(device)
+        self.actor = Actor(
+            self.state_dim, self.action_dim, self.action_bound
+        ).to(device)
+
         self.critic = Critic(self.state_dim).to(device)
 
-        self.actor_opt = optim.Adam(self.actor.parameters(), lr=1e-3)
-        self.critic_opt = optim.Adam(self.critic.parameters(), lr=1e-3)
+        self.actor_opt = optim.Adam(self.actor.parameters(), lr=lr)
+        self.critic_opt = optim.Adam(self.critic.parameters(), lr=lr)
 
         self.episode_rewards = []
+
 
     def get_action(self, state):
         state = torch.FloatTensor(state).unsqueeze(0).to(device)

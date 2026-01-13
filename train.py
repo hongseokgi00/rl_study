@@ -2,10 +2,8 @@ import argparse
 import torch
 import gymnasium as gym
 
-from rl_study.algorithms.policy_based.a2c import A2CAgent
-from rl_study.envs.make_env import make_env
-from utils import set_seed
-
+from algorithms.policy_based.a2c import A2CAgent
+from envs.make_env import make_env, EnvConfig
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -47,13 +45,13 @@ def main():
     )
     print(f"[INFO] Using device: {device}")
 
-    set_seed(cfg.seed)
-
-    env = make_env(
+    env_cfg = EnvConfig(
         env_id=cfg.env_id,
         seed=cfg.seed,
-        render=cfg.render,
+        render_mode="human" if cfg.render else None,
     )
+
+    env = make_env(env_cfg)
 
     agent = make_agent(cfg, env, device)
 
@@ -62,7 +60,5 @@ def main():
 
     env.close()
     print("[INFO] Training finished")
-
-
 if __name__ == "__main__":
     main()
