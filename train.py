@@ -1,0 +1,68 @@
+import argparse
+import torch
+import gymnasium as gym
+
+from rl_study.algorithms.policy_based.a2c import A2CAgent
+from rl_study.envs.make_env import make_env
+from utils import set_seed
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--env-id", type=str, default="HalfCheetah-v4")
+    parser.add_argument("--algo", type=str, default="a2c")
+
+    parser.add_argument("--episodes", type=int, default=500)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--gamma", type=float, default=0.99)
+
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--device", type=str, default="cuda")
+
+    parser.add_argument("--render", action="store_true")
+
+    return parser.parse_args()
+
+
+def make_agent(cfg, env, device):
+    algo = cfg.algo.lower()
+
+    if algo == "a2c":
+        return A2CAgent(
+            env=env,
+            lr=cfg.lr,
+            gamma=cfg.gamma,
+            device=device,
+        )
+    else:
+        raise ValueError(f"Unknown algorithm: {cfg.algo}")
+
+
+def main():
+    cfg = parse_args()
+
+    device = torch.device(
+        cfg.device if cfg.device == "cuda" and torch.cuda.is_available() else "cpu"
+    )
+    print(f"[INFO] Using device: {device}")
+
+    set_seed(cfg.seed)
+
+    env = make_env(
+        env_id=cfg.env_id,
+        seed=cfg.seed,
+        render=cfg.render,
+    )
+
+    agent = make_agent(cfg, env, device)
+
+    print(f"[INFO] Start training {cfg.algo.upper()} on {cfg.env_id}")
+    agent.train(max_episodes=cfg.episodes)
+
+    env.close()
+    print("[INFO] Training finished")
+
+
+if __name__ == "__main__":
+    main()
