@@ -2,7 +2,7 @@ import argparse
 import torch
 import gymnasium as gym
 
-from algorithms.policy_based.a2c import A2CAgent
+from algorithms.model_free.on_policy.a2c import A2CAgent
 from envs.make_env import make_env, EnvConfig
 
 def parse_args():
