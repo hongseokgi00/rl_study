@@ -57,14 +57,14 @@ pip install torch==2.5.1 torchvision torchaudio \
 python train.py --algo ppo
 ```
 
----
+
 
 ### Plot Reward Curve (example: PPO)
 ```bash
 python plot.py --algo ppo
 ```
 
----
+
 
 ### Play a Trained Agent (example: PPO)
 ```bash
