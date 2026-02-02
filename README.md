@@ -25,6 +25,7 @@
 - Add **model-based algorithms**
 - Add more **tasks**
 
+---
 
 ##  Environment Setup
 
@@ -69,3 +70,5 @@ python plot.py --algo ppo
 ```bash
 python play.py --algo ppo
 ```
+
+
