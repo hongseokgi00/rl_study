@@ -85,14 +85,10 @@ class A2CAgent:
         self.actor_path = os.path.join(self.result_dir, "actor.pt")
         self.critic_path = os.path.join(self.result_dir, "critic.pt")
 
-        if os.path.exists(self.reward_path):
-            self.episode_rewards = list(np.load(self.reward_path))
-            print(f"[INFO] Loaded {len(self.episode_rewards)} previous rewards")
-        else:
-            self.episode_rewards = []
-
         if os.path.exists(self.actor_path):
-            self.actor.load_state_dict(torch.load(self.actor_path, map_location=self.device))
+            self.actor.load_state_dict(
+                torch.load(self.actor_path, map_location=self.device, weights_only=True)
+            )
             if self._has_nonfinite(self.actor):
                 self.actor.apply(self._init_weights)
                 with torch.no_grad():
@@ -101,7 +97,9 @@ class A2CAgent:
                 print("[INFO] Loaded actor weights")
 
         if os.path.exists(self.critic_path):
-            self.critic.load_state_dict(torch.load(self.critic_path, map_location=self.device))
+            self.critic.load_state_dict(
+                torch.load(self.critic_path, map_location=self.device, weights_only=True)
+            )
             if self._has_nonfinite(self.critic):
                 self.critic.apply(self._init_weights)
             else:

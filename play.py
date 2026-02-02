@@ -1,8 +1,7 @@
 import argparse
-import os
 import time
-import numpy as np
 import torch
+import numpy as np
 
 from algorithms.model_free.on_policy.a2c import A2CAgent
 from algorithms.model_free.on_policy.ppo import PPOAgent
@@ -22,48 +21,61 @@ def parse_args():
     return p.parse_args()
 
 
-def load_weights(agent, algo):
+def load_weights(agent, algo, device):
     base = f"results/{algo}"
 
-    if algo == "a2c":
-        agent.actor.load_state_dict(torch.load(f"{base}/actor.pt", map_location=agent.device))
-        agent.critic.load_state_dict(torch.load(f"{base}/critic.pt", map_location=agent.device))
-
-    elif algo == "ppo":
-        agent.actor.load_state_dict(torch.load(f"{base}/actor.pt", map_location="cpu"))
-        agent.critic.load_state_dict(torch.load(f"{base}/critic.pt", map_location="cpu"))
+    if algo in ["a2c", "ppo"]:
+        agent.actor.load_state_dict(
+            torch.load(f"{base}/actor.pt", map_location=device, weights_only=True)
+        )
+        agent.critic.load_state_dict(
+            torch.load(f"{base}/critic.pt", map_location=device, weights_only=True)
+        )
+        agent.actor.to(device).eval()
+        agent.critic.to(device).eval()
 
     elif algo == "sac":
-        agent.actor.load_state_dict(torch.load(f"{base}/actor.pt", map_location="cpu"))
-        agent.q1.load_state_dict(torch.load(f"{base}/q1.pt", map_location="cpu"))
-        agent.q2.load_state_dict(torch.load(f"{base}/q2.pt", map_location="cpu"))
+        agent.actor.load_state_dict(
+            torch.load(f"{base}/actor.pt", map_location=device, weights_only=True)
+        )
+        agent.q1.load_state_dict(
+            torch.load(f"{base}/q1.pt", map_location=device, weights_only=True)
+        )
+        agent.q2.load_state_dict(
+            torch.load(f"{base}/q2.pt", map_location=device, weights_only=True)
+        )
+        agent.actor.to(device).eval()
+        agent.q1.to(device).eval()
+        agent.q2.to(device).eval()
 
     elif algo == "ddpg":
-        agent.actor.load_state_dict(torch.load(f"{base}/actor.pt", map_location="cpu"))
-        agent.critic.load_state_dict(torch.load(f"{base}/critic.pt", map_location="cpu"))
+        agent.actor.load_state_dict(
+            torch.load(f"{base}/actor.pt", map_location=device, weights_only=True)
+        )
+        agent.critic.load_state_dict(
+            torch.load(f"{base}/critic.pt", map_location=device, weights_only=True)
+        )
+        agent.actor.to(device).eval()
+        agent.critic.to(device).eval()
 
     else:
         raise ValueError(algo)
 
     print(f"[INFO] Loaded weights from {base}")
 
-
 @torch.no_grad()
-def get_action(agent, algo, state):
-    s = torch.FloatTensor(state).unsqueeze(0)
+def get_action(agent, algo, state, device):
+    s = torch.from_numpy(state).float().unsqueeze(0).to(device)
 
-    if algo in ["a2c", "ppo"]:
+    if algo in ["a2c", "ppo", "sac"]:
         mu, _ = agent.actor(s)
-        return mu.squeeze(0).cpu().numpy()
+        action = mu
+    elif algo == "ddpg":
+        action = agent.actor(s)
+    else:
+        raise ValueError(algo)
 
-    if algo == "sac":
-        mu, _ = agent.actor(s)
-        return mu.squeeze(0).cpu().numpy()
-
-    if algo == "ddpg":
-        return agent.actor(s).squeeze(0).cpu().numpy()
-
-    raise ValueError(algo)
+    return action.squeeze(0).cpu().numpy()
 
 
 def make_agent(cfg, env, device):
@@ -71,13 +83,10 @@ def make_agent(cfg, env, device):
 
     if algo == "a2c":
         return A2CAgent(env=env, device=device)
-
     if algo == "ppo":
         return PPOAgent(env=env)
-
     if algo == "sac":
         return SACAgent(env=env)
-
     if algo == "ddpg":
         return DDPGAgent(env=env)
 
@@ -91,6 +100,7 @@ def main():
     device = torch.device(
         cfg.device if cfg.device == "cuda" and torch.cuda.is_available() else "cpu"
     )
+    print(f"[INFO] Play using device: {device}")
 
     env_cfg = EnvConfig(
         env_id=cfg.env_id,
@@ -100,7 +110,7 @@ def main():
     env = make_env(env_cfg)
 
     agent = make_agent(cfg, env, device)
-    load_weights(agent, algo)
+    load_weights(agent, algo, device)
 
     print(f"[INFO] Play {algo.upper()} on {cfg.env_id}")
 
@@ -111,7 +121,7 @@ def main():
         steps = 0
 
         while not done:
-            action = get_action(agent, algo, state)
+            action = get_action(agent, algo, state, device)
             state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             ep_reward += reward

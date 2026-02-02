@@ -87,13 +87,17 @@ class PPOAgent:
             self.episode_rewards = []
 
         if os.path.exists(self.actor_path):
-            self.actor.load_state_dict(torch.load(self.actor_path, map_location=device))
+            self.actor.load_state_dict(
+                torch.load(self.actor_path, map_location=device, weights_only=True)
+            )
             print("[INFO] Loaded actor weights")
 
         if os.path.exists(self.critic_path):
-            self.critic.load_state_dict(torch.load(self.critic_path, map_location=device))
+            self.critic.load_state_dict(
+                torch.load(self.critic_path, map_location=device, weights_only=True)
+            )
             print("[INFO] Loaded critic weights")
-
+            
     def get_action(self, state):
         state_t = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
 

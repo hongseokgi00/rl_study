@@ -114,6 +114,7 @@ class SACAgent:
         self.save_dir = "results/sac"
         os.makedirs(self.save_dir, exist_ok=True)
         self.rewards = []
+        
 
     def update(self):
         if len(self.buffer) < self.batch_size:
