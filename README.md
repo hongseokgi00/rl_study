@@ -72,5 +72,14 @@ python plot.py --algo ppo
 ```bash
 python play.py --algo ppo
 ```
+---
 
+##  References
 
+- Gymnasium (Basic Usage)  
+  https://gymnasium.farama.org/introduction/basic_usage/
+
+- Reinforcement-Learning-Book-Revision  
+  https://github.com/pasus/Reinforcement-Learning-Book-Revision
+
+- 수학으로 풀어보는 강화학습 원리와 알고리즘 
