@@ -27,7 +27,7 @@
 
 ---
 
-## 🧪 Environment Setup
+##  Environment Setup
 
 ### Python Version
 ```
@@ -50,7 +50,7 @@ pip install torch==2.5.1 torchvision torchaudio \
 ---
 
 
-## 🚀 How to Use
+## How to Use
 
 ### Train an Agent (example: PPO)
 ```bash
