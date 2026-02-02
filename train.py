@@ -3,15 +3,19 @@ import torch
 import gymnasium as gym
 
 from algorithms.model_free.on_policy.a2c import A2CAgent
+from algorithms.model_free.on_policy.ppo import PPOAgent
+from algorithms.model_free.off_policy.sac import SACAgent
+from algorithms.model_free.off_policy.ddpg import DDPGAgent
 from envs.make_env import make_env, EnvConfig
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--env-id", type=str, default="HalfCheetah-v4")
+    parser.add_argument("--env-id", type=str, default="CustomInvertedPendulum-v0")
+
     parser.add_argument("--algo", type=str, default="a2c")
 
-    parser.add_argument("--episodes", type=int, default=500)
+    parser.add_argument("--episodes", type=int, default=1000)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--gamma", type=float, default=0.99)
 
@@ -33,9 +37,18 @@ def make_agent(cfg, env, device):
             gamma=cfg.gamma,
             device=device,
         )
+
+    elif algo == "ppo":
+        return PPOAgent(env=env)
+    
+    elif algo == "sac":
+        return SACAgent(env = env)
+
+    elif algo == "ddpg":
+        return DDPGAgent(env = env)
     else:
         raise ValueError(f"Unknown algorithm: {cfg.algo}")
-
+    
 
 def main():
     cfg = parse_args()

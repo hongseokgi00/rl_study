@@ -1,10 +1,8 @@
-
-
 from dataclasses import dataclass
 from typing import Optional
-
 import gymnasium as gym
 
+from envs.task.inverted_pendulum import InvertedPendulumEnv
 
 
 @dataclass
@@ -18,18 +16,31 @@ class EnvConfig:
     clip_action: bool = True
 
 
-
 def make_env(cfg: EnvConfig):
 
-    env = gym.make(
-        cfg.env_id,
-        render_mode=cfg.render_mode,
-    )
+    # 🔥 커스텀 env는 gym.make를 타지 않는다
+    if cfg.env_id == "CustomInvertedPendulum-v0":
+        print("[INFO] Using CUSTOM InvertedPendulumEnv")
+        env = InvertedPendulumEnv(
+            render_mode=cfg.render_mode,
+        )
+    else:
+        print(f"[INFO] Using GYM env: {cfg.env_id}")
+        env = gym.make(
+            cfg.env_id,
+            render_mode=cfg.render_mode,
+        )
 
+    # seed
     env.reset(seed=cfg.seed)
     env.action_space.seed(cfg.seed)
 
-    if cfg.clip_action:
-        env = gym.wrappers.ClipAction(env)  # policy는 기본 분포를 가정하고 학습 -> 가우시안 분포의 범위 (음의 무한, 양의 무한) 구간이므로 적절한 구간을 설정해야함
+    # # wrappers
+    # if cfg.clip_action:
+    #     env = gym.wrappers.ClipAction(env)
+
+    # 🔒 안전 확인 (강력 추천)
+    print("[DEBUG] env class:", env.__class__)
+    print("[DEBUG] env module:", env.__class__.__module__)
 
     return env
