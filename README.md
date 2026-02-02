@@ -17,6 +17,8 @@
 - DDPG
 - SAC
 
+### Task 
+- Inverted Pendulum
 ---
 
 ## 🛠 TODO
