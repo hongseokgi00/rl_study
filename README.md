@@ -40,6 +40,8 @@ Python 3.10.14
 - PyTorch 2.5.1 (CUDA 12.1)
 - NumPy 2.2.6
 - Matplotlib 3.9.1
+- gymnasium: 1.2.2
+- mujoco: 3.4.0
 
 
 
