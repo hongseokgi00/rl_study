@@ -17,6 +17,9 @@
 - DDPG
 - SAC
 
+### Model-Free Algorithms
+- LQR-FLM
+
 ### Task 
 - Inverted Pendulum
 ---
