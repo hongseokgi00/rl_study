@@ -17,7 +17,7 @@
 - DDPG
 - SAC
 
-### Model-Free Algorithms
+### Model-Based Algorithms
 - LQR-FLM
 
 ### Task 
